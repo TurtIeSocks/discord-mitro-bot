@@ -27,12 +27,14 @@ log.methodFactory = (methodName, logLevel, loggerName) => {
 
 log.setLevel((process.env.LOG_LEVEL as logger.LogLevelDesc) || 'info')
 
-export const logToDiscord = async (client: Client, content: string) => {
-  await client.channels
-    .fetch(config.get('discord.logChannel'))
-    .then(async (channel) => {
-      if (channel?.isTextBased()) {
-        channel.send({ content, flags: MessageFlags.SuppressEmbeds })
-      }
-    })
+export const logToDiscord = async (
+  client: Client,
+  channel: string,
+  content: string,
+) => {
+  await client.channels.fetch(channel).then(async (channel) => {
+    if (channel?.isTextBased()) {
+      channel.send({ content, flags: MessageFlags.SuppressEmbeds })
+    }
+  })
 }

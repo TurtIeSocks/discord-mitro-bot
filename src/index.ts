@@ -13,12 +13,12 @@ async function main() {
   setInterval(async () => {
     await testEndpoint(config.get('endpoint.main')).then(async (res) => {
       if (res.startsWith(':x:')) {
-        await logToDiscord(discord, res)
+        await logToDiscord(discord, config.get('discord.logChannel'), res)
       }
     })
     await testEndpoint(config.get('endpoint.backup')).then(async (res) => {
       if (res.startsWith(':x:')) {
-        await logToDiscord(discord, res)
+        await logToDiscord(discord, config.get('discord.logChannel'), res)
       }
     })
   }, 1000 * 60)

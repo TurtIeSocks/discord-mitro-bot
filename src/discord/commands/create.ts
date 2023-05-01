@@ -9,6 +9,7 @@ import {
 import config from 'config'
 
 import type { Command } from '../../types'
+import { buildProxy } from '../../services/utils'
 
 export const create: Command = {
   data: new SlashCommandBuilder()
@@ -31,14 +32,10 @@ export const create: Command = {
         github_username: githubUsername,
         main_endpoint:
           interaction.fields.getTextInputValue('mainEndpoint') ||
-          config
-            .get<string>('endpoint.main')
-            ?.replace('pokelame', githubUsername),
+          buildProxy(config.get<string>('endpoint.main'), githubUsername),
         backup_endpoint:
           interaction.fields.getTextInputValue('backupEndpoint') ||
-          config
-            .get<string>('endpoint.backup')
-            ?.replace('pokelame', githubUsername),
+          buildProxy(config.get<string>('endpoint.backup'), githubUsername),
         amount,
         active: !!amount,
       },

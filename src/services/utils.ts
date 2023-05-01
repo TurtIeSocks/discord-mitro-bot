@@ -9,9 +9,9 @@ export async function testEndpoint(proxy: string) {
       agent: new ProxyAgent(proxy),
     })
     if (res.status === 200) {
-      log.info(`[${proxy}] OK!`)
+      log.info(`[${proxy}] ${res.status} ${res.statusText}`)
     } else {
-      log.warn(`[${proxy}] Failure!`)
+      log.warn(`[${proxy}] ${res.status} ${res.statusText}`)
     }
     return `:white_check_mark: ${res.status} ${res.statusText}`
   } catch (e) {
@@ -23,6 +23,21 @@ export async function testEndpoint(proxy: string) {
   }
 }
 
-export function jsonifyObject(obj: object) {
+export function jsonifyObject(obj: object | null) {
   return `\`\`\`json\n${JSON.stringify(obj, null, 2)}\`\`\``
+}
+
+export function getPassword() {
+  const length = 16
+  const charset =
+    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let retVal = ''
+  for (let i = 0, n = charset.length; i < length; ++i) {
+    retVal += charset.charAt(Math.floor(Math.random() * n))
+  }
+  return retVal
+}
+
+export function buildProxy(proxy: string, username: string) {
+  return `http://${username}:${getPassword()}@${proxy.split('@')[1]}`
 }

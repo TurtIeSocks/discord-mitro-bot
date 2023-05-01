@@ -5,7 +5,9 @@
   "discord": {
     "token": "your-discord-token",
     "clientId": "your-discord-client-id",
-    "guildId": "your-discord-guild-id"
+    "guildId": "your-discord-guild-id",
+    "logChannel": "00000000",
+    "sponsorChannel": "00000000"
   },
   "endpoint": {
     "test": "https://www.google.com",

@@ -2,8 +2,9 @@ import { PrismaClient } from '@prisma/client'
 import type { Client } from 'discord.js'
 import fastify, { RouteShorthandOptions } from 'fastify'
 import config from 'config'
-import { log } from './logger'
+import { log, logToDiscord } from './logger'
 import { GitHubSponsorshipEvent } from '../types'
+import { buildProxy, jsonifyObject } from './utils'
 
 const app = fastify()
 
@@ -40,6 +41,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
               },
               data: {
                 amount: tier.monthly_price_in_dollars,
+                active: true,
               },
             })
             log.info(
@@ -50,6 +52,15 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
               data: {
                 github_username: sponsor.login,
                 amount: tier.monthly_price_in_dollars,
+                active: true,
+                main_endpoint: buildProxy(
+                  config.get<string>('endpoint.main'),
+                  sponsor.login,
+                ),
+                backup_endpoint: buildProxy(
+                  config.get<string>('endpoint.backup'),
+                  sponsor.login,
+                ),
               },
             })
           }
@@ -67,6 +78,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
               },
               data: {
                 amount: tier.monthly_price_in_dollars,
+                active: tier.monthly_price_in_dollars > 0,
               },
             })
             log.info(
@@ -77,6 +89,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
               data: {
                 github_username: sponsor.login,
                 amount: tier.monthly_price_in_dollars,
+                active: tier.monthly_price_in_dollars > 0,
               },
             })
           }
@@ -103,6 +116,17 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
         default:
           break
       }
+      logToDiscord(
+        this.discord,
+        config.get('discord.sponsorChannel'),
+        jsonifyObject(
+          await this.prisma.user.findFirst({
+            where: {
+              github_username: sponsor.login,
+            },
+          }),
+        ),
+      )
       res.status(200).send('OK')
     }
   },
