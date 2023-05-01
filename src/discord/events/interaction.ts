@@ -17,7 +17,7 @@ export function interaction(client: Client): void {
 
       log.info(
         HELPERS.discord,
-        interaction.command?.name,
+        interaction.commandName,
         interaction.user.tag,
         interaction.guild?.name ?? interaction.guildId ?? 'DM',
       )
@@ -55,7 +55,7 @@ export function interaction(client: Client): void {
       } catch (error) {
         log.error(
           HELPERS.discord,
-          interaction.command?.name,
+          interaction.commandName,
           interaction.user.tag,
           interaction.guild?.name ?? interaction.guildId ?? 'DM',
           error,
