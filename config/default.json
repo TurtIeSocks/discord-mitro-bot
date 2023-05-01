@@ -1,0 +1,14 @@
+{
+  "databaseUrl": "mysql://localhost:5432/mitro",
+  "discord": {
+    "token": "your-discord-token",
+    "clientId": "your-discord-client-id",
+    "guildId": "your-discord-guild-id"
+  },
+  "endpoint": {
+    "test": "https://www.google.com",
+    "main": "http://localhost:3000",
+    "backup": "http://localhost:3000"
+  },
+  "apiSecret": "change me"
+}
