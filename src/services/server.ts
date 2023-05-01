@@ -119,8 +119,8 @@ export async function startServer(prisma: PrismaClient, discord: Client) {
 
   return app
     .listen({
-      host: '0.0.0.0',
-      port: process.env.PORT ? +process.env.PORT : 3001,
+      host: config.get('host') || '0.0.0.0',
+      port: config.get('port') || 3001,
     })
     .then((address) => log.info(`Server listening on ${address}`))
 }
