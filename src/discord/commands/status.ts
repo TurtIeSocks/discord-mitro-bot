@@ -19,6 +19,7 @@ export const status: Command = {
         await interaction.reply({
           content: `Main Endpoint: ${await testEndpoint(user.main_endpoint)}`,
           flags: MessageFlags.SuppressEmbeds,
+          ephemeral: true,
         })
       }
       if (user.backup_endpoint) {
@@ -27,12 +28,14 @@ export const status: Command = {
           content: `Backup Endpoint: ${await testEndpoint(
             user.backup_endpoint,
           )}`,
+          ephemeral: true,
         })
       }
     } else {
       await interaction.reply({
         content:
           'You are not registered in the database or your proxy is not active',
+        ephemeral: true,
       })
     }
   },

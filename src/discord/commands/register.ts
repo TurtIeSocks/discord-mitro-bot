@@ -15,6 +15,7 @@ export const register: Command = {
   modal: async (interaction) => {
     const initial = await interaction.reply({
       content: 'Awaiting user input',
+      ephemeral: true,
     })
 
     const githubUsername = interaction.fields.getTextInputValue('github')

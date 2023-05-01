@@ -16,10 +16,12 @@ export const info: Command = {
     if (user) {
       await interaction.reply({
         content: jsonifyObject(user),
+        ephemeral: true,
       })
     } else {
       await interaction.reply({
         content: 'No user found',
+        ephemeral: true,
       })
     }
   },
