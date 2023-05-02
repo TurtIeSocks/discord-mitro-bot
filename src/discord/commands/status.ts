@@ -28,6 +28,7 @@ export const status: Command = {
         content: 'Proxy Status:',
         embeds,
         ephemeral: true,
+        flags: MessageFlags.SuppressEmbeds,
       })
     } else {
       await interaction.reply({

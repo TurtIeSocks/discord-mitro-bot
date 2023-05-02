@@ -56,6 +56,7 @@ export function ready(client: Client): void {
           content: 'Proxy Status:',
           embeds,
         }
+        log.info({ embeds, failed, sendNew })
         if (sendNew) {
           message = await channel.send(newMessage)
           sendNew = false
