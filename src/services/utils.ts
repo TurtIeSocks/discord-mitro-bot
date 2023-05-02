@@ -1,9 +1,11 @@
-import fetch from 'node-fetch'
+import fetch, { FetchError } from 'node-fetch'
 import ProxyAgent from 'proxy-agent'
 import config from 'config'
 import { log } from './logger'
+import { APIEmbed, Colors } from 'discord.js'
+import { ProxyStatus } from '../types'
 
-export async function testEndpoint(proxy: string) {
+export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
   try {
     const res = await fetch(config.get('endpoint.test'), {
       agent: new ProxyAgent(proxy),
@@ -13,13 +15,26 @@ export async function testEndpoint(proxy: string) {
     } else {
       log.warn(`[${proxy}] ${res.status} ${res.statusText}`)
     }
-    return `:white_check_mark: ${res.status} ${res.statusText}`
-  } catch (e) {
-    if (e instanceof Error) {
-      log.error(e.message)
-      return `:x: ${e.message}`
+    return {
+      code: res.status,
+      message: res.statusText,
     }
-    return 'Error'
+  } catch (e) {
+    if (e instanceof FetchError) {
+      log.error(e.message)
+      return {
+        code: 500,
+        message:
+          e.code ||
+          e.message
+            .replace(`to ${config.get('endpoint.test')}`, '')
+            .replace(proxy, ''),
+      }
+    }
+    return {
+      code: 500,
+      message: 'Unknown error',
+    }
   }
 }
 
@@ -40,4 +55,13 @@ export function getPassword() {
 
 export function buildProxy(proxy: string, username: string) {
   return `http://${username}:${getPassword()}@${proxy.split('@')[1]}`
+}
+
+export function getEmbed(status: ProxyStatus, proxy: string): APIEmbed {
+  return {
+    title: `${status.code} for ${proxy} Proxy`,
+    color: { 200: Colors.Green, 500: Colors.Red }[status.code] || Colors.Yellow,
+    timestamp: new Date().toISOString(),
+    description: status.message,
+  }
 }

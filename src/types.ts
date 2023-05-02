@@ -75,3 +75,8 @@ export interface Created {
 }
 
 export type GitHubSponsorshipEvent = Cancelled | Changed | Created
+
+export interface ProxyStatus {
+  code: number
+  message: string
+}

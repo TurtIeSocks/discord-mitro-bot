@@ -1,7 +1,7 @@
-import { testEndpoint } from '../../services/utils'
+import { getEmbed, testEndpoint } from '../../services/utils'
 import type { Command } from '../../types'
 
-import { MessageFlags, SlashCommandBuilder } from 'discord.js'
+import { APIEmbed, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
 export const status: Command = {
   data: new SlashCommandBuilder()
@@ -15,22 +15,20 @@ export const status: Command = {
     })
 
     if (user?.active) {
+      const embeds: APIEmbed[] = []
       if (user.main_endpoint) {
-        await interaction.reply({
-          content: `Main Endpoint: ${await testEndpoint(user.main_endpoint)}`,
-          flags: MessageFlags.SuppressEmbeds,
-          ephemeral: true,
-        })
+        embeds.push(getEmbed(await testEndpoint(user.main_endpoint), 'Main'))
       }
       if (user.backup_endpoint) {
-        await interaction.followUp({
-          flags: MessageFlags.SuppressEmbeds,
-          content: `Backup Endpoint: ${await testEndpoint(
-            user.backup_endpoint,
-          )}`,
-          ephemeral: true,
-        })
+        embeds.push(
+          getEmbed(await testEndpoint(user.backup_endpoint), 'Backup'),
+        )
       }
+      await interaction.reply({
+        content: 'Proxy Status:',
+        embeds,
+        ephemeral: true,
+      })
     } else {
       await interaction.reply({
         content:
