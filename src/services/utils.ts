@@ -6,9 +6,17 @@ import { APIEmbed, Colors } from 'discord.js'
 import { ProxyStatus } from '../types'
 
 export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
+  const controller = new AbortController()
+
+  const timeout = setTimeout(() => {
+    controller.abort()
+  }, 5000)
+
   try {
     const res = await fetch(config.get('endpoint.test'), {
       agent: new ProxyAgent(proxy),
+      // @ts-ignore
+      signal: controller.signal,
     })
     if (res.status === 200) {
       log.info(`[${proxy}] ${res.status} ${res.statusText}`)
@@ -35,6 +43,8 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
       code: 500,
       message: 'Unknown error',
     }
+  } finally {
+    clearTimeout(timeout)
   }
 }
 
