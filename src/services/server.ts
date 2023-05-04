@@ -24,8 +24,8 @@ const auth: RouteShorthandOptions['preHandler'] = async (
 app.post<{ Body: GitHubSponsorshipEvent }>(
   '/api/sponsor',
   async function (req, res) {
-    log.info(JSON.stringify({ headers: req.headers, body: req.body }, null, 2))
-    if (req.headers['x-Github-Event'] === 'sponsorship') {
+    // log.info(JSON.stringify({ headers: req.headers, body: req.body }, null, 2))
+    if (req.headers['x-github-event'] === 'sponsorship') {
       log.info('Received sponsor webhook', req.body.action)
       const { sponsor, tier } = req.body.sponsorship
       switch (req.body.action) {
