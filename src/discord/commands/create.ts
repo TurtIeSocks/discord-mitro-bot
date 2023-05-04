@@ -26,16 +26,22 @@ export const create: Command = {
       interaction.fields.getTextInputValue('githubUsername')
     const amount = +interaction.fields.getTextInputValue('amount') || 0
 
+    const main =
+      interaction.fields.getTextInputValue('mainEndpoint') ||
+      buildProxy(config.get<string>('endpoint.main'), githubUsername)
+
     const newUser = await interaction.client.ctx.db.user.create({
       data: {
         discord_id: discordId,
         github_username: githubUsername,
-        main_endpoint:
-          interaction.fields.getTextInputValue('mainEndpoint') ||
-          buildProxy(config.get<string>('endpoint.main'), githubUsername),
+        main_endpoint: main,
         backup_endpoint:
           interaction.fields.getTextInputValue('backupEndpoint') ||
-          buildProxy(config.get<string>('endpoint.backup'), githubUsername),
+          buildProxy(
+            config.get<string>('endpoint.backup'),
+            githubUsername,
+            main.split(':')[1].split('@')[0],
+          ),
         amount,
         active: !!amount,
       },

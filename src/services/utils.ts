@@ -63,8 +63,12 @@ export function getPassword() {
   return retVal
 }
 
-export function buildProxy(proxy: string, username: string) {
-  return `http://${username}:${getPassword()}@${proxy.split('@')[1]}`
+export function buildProxy(
+  proxy: string,
+  username: string,
+  password = getPassword(),
+) {
+  return `http://${username}:${password}@${proxy.split('@')[1]}`
 }
 
 export function getEmbed(status: ProxyStatus, proxy: string): APIEmbed {

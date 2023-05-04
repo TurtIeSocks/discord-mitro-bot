@@ -48,18 +48,20 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
               `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
             )
           } else {
+            const main = buildProxy(
+              config.get<string>('endpoint.main'),
+              sponsor.login,
+            )
             await this.prisma.user.create({
               data: {
                 github_username: sponsor.login,
                 amount: tier.monthly_price_in_dollars,
                 active: true,
-                main_endpoint: buildProxy(
-                  config.get<string>('endpoint.main'),
-                  sponsor.login,
-                ),
+                main_endpoint: main,
                 backup_endpoint: buildProxy(
                   config.get<string>('endpoint.backup'),
                   sponsor.login,
+                  main.split(':')[1].split('@')[0],
                 ),
               },
             })
