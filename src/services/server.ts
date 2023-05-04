@@ -122,13 +122,14 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
       logToDiscord(
         this.discord,
         config.get('discord.sponsorChannel'),
-        jsonifyObject(
-          await this.prisma.user.findFirst({
+        jsonifyObject({
+          action: req.body.action,
+          user: await this.prisma.user.findFirst({
             where: {
               github_username: sponsor.login,
             },
           }),
-        ),
+        }),
       )
       res.status(200).send('OK')
     }
