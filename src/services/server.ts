@@ -61,7 +61,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 backup_endpoint: buildProxy(
                   config.get<string>('endpoint.backup'),
                   sponsor.login,
-                  main.split(':')[1].split('@')[0],
+                  main.split(':')[2].split('@')[0],
                 ),
               },
             })

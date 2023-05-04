@@ -40,7 +40,7 @@ export const create: Command = {
           buildProxy(
             config.get<string>('endpoint.backup'),
             githubUsername,
-            main.split(':')[1].split('@')[0],
+            main.split(':')[2].split('@')[0],
           ),
         amount,
         active: !!amount,
