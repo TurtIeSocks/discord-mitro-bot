@@ -19,17 +19,24 @@ export function ready(client: Client): void {
     if (channel?.isTextBased()) {
       let failed = false
       let sendNew = false
+      const initialEmbeds: APIEmbed[] = []
+      await testEndpoint(config.get('endpoint.main')).then(async (res) => {
+        initialEmbeds.push(getEmbed(res, 'Main'))
+      })
+      await testEndpoint(config.get('endpoint.backup')).then(async (res) => {
+        initialEmbeds.push(getEmbed(res, 'Backup'))
+      })
 
       await channel.messages.fetch()
       let message =
         channel.lastMessage?.author.id === client.user.id
           ? await channel.lastMessage.edit({
-              content: 'Checking proxies...',
-              embeds: [],
+              content: 'Proxy Status:',
+              embeds: initialEmbeds,
             })
           : await channel.send({
-              content: 'Checking proxies...',
-              embeds: [],
+              content: 'Proxy Status:',
+              embeds: initialEmbeds,
             })
 
       setInterval(async () => {
