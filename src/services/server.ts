@@ -32,99 +32,105 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
       log.info('Received sponsor webhook', req.body.action)
       const { sponsor, tier } = req.body.sponsorship
       switch (req.body.action) {
-        case 'created': {
-          const user = await this.prisma.user.findFirst({
-            where: {
-              github_username: sponsor.login,
-            },
-          })
-          if (user) {
-            await this.prisma.user.update({
+        case 'created':
+          {
+            const user = await this.prisma.user.findFirst({
               where: {
-                id: user.id,
-              },
-              data: {
-                amount: tier.monthly_price_in_dollars,
-                active: true,
-              },
-            })
-            log.info(
-              `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
-            )
-          } else {
-            const main = buildProxy(
-              config.get<string>('endpoint.main'),
-              sponsor.login,
-            )
-            await this.prisma.user.create({
-              data: {
                 github_username: sponsor.login,
-                amount: tier.monthly_price_in_dollars,
-                active: true,
-                main_endpoint: main,
-                backup_endpoint: buildProxy(
-                  config.get<string>('endpoint.backup'),
-                  sponsor.login,
-                  main.split(':')[2].split('@')[0],
-                ),
               },
             })
-            log.info(
-              `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
-            )
+            if (user) {
+              await this.prisma.user.update({
+                where: {
+                  id: user.id,
+                },
+                data: {
+                  amount: tier.monthly_price_in_dollars,
+                  active: true,
+                },
+              })
+              log.info(
+                `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
+              )
+            } else {
+              const main = buildProxy(
+                config.get<string>('endpoint.main'),
+                sponsor.login,
+              )
+              await this.prisma.user.create({
+                data: {
+                  github_username: sponsor.login,
+                  amount: tier.monthly_price_in_dollars,
+                  active: true,
+                  main_endpoint: main,
+                  backup_endpoint: buildProxy(
+                    config.get<string>('endpoint.backup'),
+                    sponsor.login,
+                    main.split(':')[2].split('@')[0],
+                  ),
+                },
+              })
+              log.info(
+                `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
+              )
+            }
           }
-        }
-        case 'tier_changed': {
-          const user = await this.prisma.user.findFirst({
-            where: {
-              github_username: sponsor.login,
-            },
-          })
-          if (user) {
-            await this.prisma.user.update({
+          break
+        case 'tier_changed':
+          {
+            const user = await this.prisma.user.findFirst({
               where: {
-                id: user.id,
-              },
-              data: {
-                amount: tier.monthly_price_in_dollars,
-                active: tier.monthly_price_in_dollars > 0,
-              },
-            })
-            log.info(
-              `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
-            )
-          } else {
-            await this.prisma.user.create({
-              data: {
                 github_username: sponsor.login,
-                amount: tier.monthly_price_in_dollars,
-                active: tier.monthly_price_in_dollars > 0,
               },
             })
-            log.info(
-              `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
-            )
+            if (user) {
+              await this.prisma.user.update({
+                where: {
+                  id: user.id,
+                },
+                data: {
+                  amount: tier.monthly_price_in_dollars,
+                  active: tier.monthly_price_in_dollars > 0,
+                },
+              })
+              log.info(
+                `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
+              )
+            } else {
+              await this.prisma.user.create({
+                data: {
+                  github_username: sponsor.login,
+                  amount: tier.monthly_price_in_dollars,
+                  active: tier.monthly_price_in_dollars > 0,
+                },
+              })
+              log.info(
+                `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
+              )
+            }
           }
-        }
-        case 'cancelled': {
-          const user = await this.prisma.user.findFirst({
-            where: {
-              github_username: sponsor.login,
-            },
-          })
-          if (user) {
-            await this.prisma.user.update({
+          break
+        case 'cancelled':
+          {
+            const user = await this.prisma.user.findFirst({
               where: {
-                id: user.id,
-              },
-              data: {
-                amount: 0,
-                active: false,
+                github_username: sponsor.login,
               },
             })
-            log.info(`Updated ${sponsor.login} to tier 0`)
+            if (user) {
+              await this.prisma.user.update({
+                where: {
+                  id: user.id,
+                },
+                data: {
+                  amount: 0,
+                  active: false,
+                },
+              })
+              log.info(`Updated ${sponsor.login} to tier 0`)
+            }
           }
-        }
+          break
         default:
           break
       }
