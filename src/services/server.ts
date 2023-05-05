@@ -24,7 +24,10 @@ const auth: RouteShorthandOptions['preHandler'] = async (
 app.post<{ Body: GitHubSponsorshipEvent }>(
   '/api/sponsor',
   async function (req, res) {
-    // log.info(JSON.stringify({ headers: req.headers, body: req.body }, null, 2))
+    log.info(
+      '[SPONSORSHIP WEBHOOK]',
+      JSON.stringify({ headers: req.headers, body: req.body }, null, 2),
+    )
     if (req.headers['x-github-event'] === 'sponsorship') {
       log.info('Received sponsor webhook', req.body.action)
       const { sponsor, tier } = req.body.sponsorship
@@ -66,6 +69,9 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 ),
               },
             })
+            log.info(
+              `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
+            )
           }
         }
         case 'tier_changed': {
@@ -95,6 +101,9 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 active: tier.monthly_price_in_dollars > 0,
               },
             })
+            log.info(
+              `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
+            )
           }
         }
         case 'cancelled': {
@@ -137,7 +146,19 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
 )
 
 app.get('/api/users', { preHandler: [auth] }, async function (req, res) {
-  const users = await this.prisma.user.findMany()
+  const users = await this.prisma.user.findMany().then((users) =>
+    users
+      .filter((user) => user.active && user.main_endpoint)
+      .map((user) => {
+        const [username, password] = user
+          .main_endpoint!.split('@')[0]
+          .replace('http://', '')
+          .split(':')
+        return username && password && `basic_auth ${username} ${password}`
+      })
+      .filter(Boolean)
+      .join('\n'),
+  )
   res.send(users)
 })
 
