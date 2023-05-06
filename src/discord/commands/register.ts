@@ -5,6 +5,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js'
+import config from 'config'
 
 import type { Command } from '../../types'
 
@@ -26,17 +27,31 @@ export const register: Command = {
       },
     })
     if (user) {
-      await interaction.client.ctx.db.user.update({
-        where: {
-          id: user.id,
-        },
-        data: {
-          discord_id: interaction.user.id,
-        },
-      })
-      await initial.edit({
-        content: `:white_check_mark: Associated your Discord account with your GitHub account`,
-      })
+      const sponsorChannel = interaction.client.channels.cache.get(
+        config.get('discord.sponsorChannel'),
+      )
+      if (sponsorChannel?.isTextBased()) {
+        await sponsorChannel.send({
+          content: `${interaction.user.id} just registered as \`${githubUsername}\``,
+        })
+      }
+      if (user.discord_id) {
+        await initial.edit({
+          content: `:x: GitHub user \`${githubUsername}\` is already associated with a Discord account`,
+        })
+      } else {
+        await interaction.client.ctx.db.user.update({
+          where: {
+            id: user.id,
+          },
+          data: {
+            discord_id: interaction.user.id,
+          },
+        })
+        await initial.edit({
+          content: `:white_check_mark: Associated your Discord account with your GitHub account`,
+        })
+      }
     } else {
       await initial.edit({
         content: `:x: No user found with GitHub username \`${githubUsername}\``,
