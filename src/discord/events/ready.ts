@@ -75,7 +75,7 @@ export function ready(client: Client): void {
         } else {
           await message.edit(newMessage)
         }
-      }, 1000 * 20)
+      }, 1000 * 60)
     }
   })
 }
