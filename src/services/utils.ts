@@ -28,8 +28,8 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
       message: res.statusText,
     }
   } catch (e) {
+    log.error(e)
     if (e instanceof FetchError) {
-      log.error(e.message)
       return {
         code: 500,
         message:
@@ -41,11 +41,21 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
     }
     return {
       code: 500,
-      message: 'Unknown error',
+      message: e instanceof Error ? e.message : 'Unknown error',
     }
   } finally {
     clearTimeout(timeout)
   }
+}
+
+export async function tripleCheck(endpoint: string) {
+  return testEndpoint(endpoint).then(async (res) => {
+    if (res.code === 200) return res
+    return testEndpoint(endpoint).then(async (res2) => {
+      if (res2.code === 200) return res2
+      return testEndpoint(endpoint)
+    })
+  })
 }
 
 export function jsonifyObject(obj: object | null) {

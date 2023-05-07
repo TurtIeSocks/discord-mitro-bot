@@ -21,7 +21,11 @@ const LOG_LEVEL_ICONS = {
 log.methodFactory = (methodName, logLevel, loggerName) => {
   const rawMethod = logger.methodFactory(methodName, logLevel, loggerName)
   return (...args) => {
-    rawMethod(LOG_LEVEL_ICONS[methodName] ?? '', ...args)
+    rawMethod(
+      LOG_LEVEL_ICONS[methodName] ?? '',
+      new Date().toISOString().split('.')[0].split('T').join(' '),
+      ...args,
+    )
   }
 }
 

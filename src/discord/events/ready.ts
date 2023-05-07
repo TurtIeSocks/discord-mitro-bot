@@ -2,7 +2,7 @@ import { Client, Events, Colors, APIEmbed } from 'discord.js'
 import config from 'config'
 
 import { HELPERS, log } from '../../services/logger'
-import { getEmbed, testEndpoint } from '../../services/utils'
+import { getEmbed, tripleCheck } from '../../services/utils'
 
 export function ready(client: Client): void {
   client.on(Events.ClientReady, async () => {
@@ -17,20 +17,25 @@ export function ready(client: Client): void {
       config.get('discord.logChannel'),
     )
     if (channel?.isTextBased()) {
-      let failed = false
-      let sendNew = false
       const initialEmbeds: APIEmbed[] = []
-      await testEndpoint(config.get('endpoint.main')).then(async (res) => {
+      await tripleCheck(config.get('endpoint.main')).then((res) => {
         initialEmbeds.push(getEmbed(res, 'Main'))
       })
-      await testEndpoint(config.get('endpoint.backup')).then(async (res) => {
+      await tripleCheck(config.get('endpoint.backup')).then((res) => {
         initialEmbeds.push(getEmbed(res, 'Backup'))
       })
+      let failed = initialEmbeds.some((embed) => embed.color === Colors.Red)
+      let sendNew = false
 
       await channel.messages.fetch()
       let message =
         channel.lastMessage?.author.id === client.user.id
           ? await channel.lastMessage.edit({
+              content: 'Proxy Status:',
+              embeds: initialEmbeds,
+            })
+          : channel.lastMessage
+          ? await channel.lastMessage?.reply({
               content: 'Proxy Status:',
               embeds: initialEmbeds,
             })
@@ -41,13 +46,14 @@ export function ready(client: Client): void {
 
       setInterval(async () => {
         const embeds: APIEmbed[] = []
-        await testEndpoint(config.get('endpoint.main')).then(async (res) => {
+        await tripleCheck(config.get('endpoint.main')).then((res) => {
           embeds.push(getEmbed(res, 'Main'))
         })
-        await testEndpoint(config.get('endpoint.backup')).then(async (res) => {
+        await tripleCheck(config.get('endpoint.backup')).then((res) => {
           embeds.push(getEmbed(res, 'Backup'))
         })
-        if (embeds.some((embed) => embed.color === Colors.Red)) {
+        const runFailed = embeds.some((embed) => embed.color === Colors.Red)
+        if (runFailed) {
           // if any of the proxies are down
           if (!failed) {
             // if we haven't already sent a message
@@ -69,7 +75,7 @@ export function ready(client: Client): void {
         } else {
           await message.edit(newMessage)
         }
-      }, 1000 * 20) // 20 seconds
+      }, 1000 * 20)
     }
   })
 }
