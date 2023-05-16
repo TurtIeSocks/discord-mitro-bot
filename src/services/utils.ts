@@ -10,7 +10,7 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
 
   const timeout = setTimeout(() => {
     controller.abort()
-  }, 5000)
+  }, 10_000)
 
   try {
     const res = await fetch(config.get('endpoint.test'), {
@@ -51,8 +51,10 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
 export async function tripleCheck(endpoint: string) {
   return testEndpoint(endpoint).then(async (res) => {
     if (res.code === 200) return res
+    await new Promise((resolve) => setTimeout(resolve, 20_000))
     return testEndpoint(endpoint).then(async (res2) => {
       if (res2.code === 200) return res2
+      await new Promise((resolve) => setTimeout(resolve, 20_000))
       return testEndpoint(endpoint)
     })
   })
