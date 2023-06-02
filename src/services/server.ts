@@ -31,12 +31,13 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
     if (req.headers['x-github-event'] === 'sponsorship') {
       log.info('Received sponsor webhook', req.body.action)
       const { sponsor, tier } = req.body.sponsorship
+      const username = sponsor.login.toLowerCase()
       switch (req.body.action) {
         case 'created':
           {
             const user = await this.prisma.user.findFirst({
               where: {
-                github_username: sponsor.login,
+                github_username: username,
               },
             })
             if (user) {
@@ -55,17 +56,17 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
             } else {
               const main = buildProxy(
                 config.get<string>('endpoint.main'),
-                sponsor.login,
+                username,
               )
               await this.prisma.user.create({
                 data: {
-                  github_username: sponsor.login,
+                  github_username: username,
                   amount: tier.monthly_price_in_dollars,
                   active: true,
                   main_endpoint: main,
                   backup_endpoint: buildProxy(
                     config.get<string>('endpoint.backup'),
-                    sponsor.login,
+                    username,
                     main.split(':')[2].split('@')[0],
                   ),
                 },
@@ -80,7 +81,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
           {
             const user = await this.prisma.user.findFirst({
               where: {
-                github_username: sponsor.login,
+                github_username: username,
               },
             })
             if (user) {
@@ -99,7 +100,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
             } else {
               await this.prisma.user.create({
                 data: {
-                  github_username: sponsor.login,
+                  github_username: username,
                   amount: tier.monthly_price_in_dollars,
                   active: tier.monthly_price_in_dollars > 0,
                 },
@@ -114,7 +115,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
           {
             const user = await this.prisma.user.findFirst({
               where: {
-                github_username: sponsor.login,
+                github_username: username,
               },
             })
             if (user) {
@@ -141,7 +142,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
           action: req.body.action,
           user: await this.prisma.user.findFirst({
             where: {
-              github_username: sponsor.login,
+              github_username: username,
             },
           }),
         }),
