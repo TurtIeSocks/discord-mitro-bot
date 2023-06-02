@@ -4,6 +4,7 @@ import config from 'config'
 import { log } from './logger'
 import { APIEmbed, Colors } from 'discord.js'
 import { ProxyStatus } from '../types'
+import generatePassword from "password-generator";
 
 export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
   const controller = new AbortController()
@@ -65,14 +66,7 @@ export function jsonifyObject(obj: object | null) {
 }
 
 export function getPassword() {
-  const length = 16
-  const charset =
-    'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
-  let retVal = ''
-  for (let i = 0, n = charset.length; i < length; ++i) {
-    retVal += charset.charAt(Math.floor(Math.random() * n))
-  }
-  return retVal
+  return generatePassword(20)
 }
 
 export function buildProxy(

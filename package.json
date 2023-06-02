@@ -23,6 +23,7 @@
     "fastify": "^4.17.0",
     "loglevel": "^1.8.1",
     "node-fetch": "2.6.7",
+    "password-generator": "^2.3.2",
     "prisma": "^4.13.0",
     "proxy-agent": "^5.0.0"
   },
