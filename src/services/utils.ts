@@ -4,60 +4,56 @@ import config from 'config'
 import { log } from './logger'
 import { APIEmbed, Colors } from 'discord.js'
 import { ProxyStatus } from '../types'
+import * as assert from "assert";
 
 export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
-  const controller = new AbortController()
+  for (let tries = 2; tries >= 0; --tries) {
+    const controller = new AbortController()
 
-  const timeout = setTimeout(() => {
-    controller.abort()
-  }, 10_000)
+    const timeout = setTimeout(() => {
+      controller.abort()
+    }, 10_000)
 
-  try {
-    const res = await fetch(config.get('endpoint.test'), {
-      agent: new ProxyAgent(proxy),
-      // @ts-ignore
-      signal: controller.signal,
-    })
-    if (res.status === 200) {
-      log.info(`[${proxy}] ${res.status} ${res.statusText}`)
-    } else {
-      log.warn(`[${proxy}] ${res.status} ${res.statusText}`)
-    }
-    return {
-      code: res.status,
-      message: res.statusText,
-    }
-  } catch (e) {
-    log.error(e)
-    if (e instanceof FetchError) {
+    try {
+      const res = await fetch(config.get('endpoint.test'), {
+        agent: new ProxyAgent(proxy),
+        // @ts-ignore
+        signal: controller.signal,
+      })
+      if (res.status === 200) {
+        log.info(`[${proxy}] ${res.status} ${res.statusText}`)
+      } else {
+        log.warn(`[${proxy}] ${res.status} ${res.statusText}`)
+      }
+      return {
+        code: res.status,
+        message: res.statusText,
+      }
+    } catch (e) {
+      log.error(e)
+      if (tries) continue
+      if (e instanceof FetchError) {
+        return {
+          code: -1,
+          message:
+              e.code ||
+              e.message
+                  .replace(`to ${config.get('endpoint.test')}`, '')
+                  .replace(proxy, ''),
+        }
+      }
       return {
         code: 500,
-        message:
-          e.code ||
-          e.message
-            .replace(`to ${config.get('endpoint.test')}`, '')
-            .replace(proxy, ''),
+        message: e instanceof Error ? e.message : `${e}`,
       }
+    } finally {
+      clearTimeout(timeout)
     }
-    return {
-      code: 500,
-      message: e instanceof Error ? e.message : 'Unknown error',
-    }
-  } finally {
-    clearTimeout(timeout)
   }
-}
-
-export async function tripleCheck(endpoint: string) {
-  return testEndpoint(endpoint).then(async (res) => {
-    if (res.code === 200) return res
-    await new Promise((resolve) => setTimeout(resolve, 20_000))
-    return testEndpoint(endpoint).then(async (res2) => {
-      if (res2.code === 200) return res2
-      await new Promise((resolve) => setTimeout(resolve, 20_000))
-      return testEndpoint(endpoint)
-    })
-  })
+  return {
+    code: -2,
+    message: "uh oh",
+  }
 }
 
 export function jsonifyObject(obj: object | null) {
