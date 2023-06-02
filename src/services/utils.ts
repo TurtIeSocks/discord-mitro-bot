@@ -43,7 +43,7 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
         }
       }
       return {
-        code: 500,
+        code: -2,
         message: e instanceof Error ? e.message : `${e}`,
       }
     } finally {
@@ -51,7 +51,7 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
     }
   }
   return {
-    code: -2,
+    code: -3,
     message: "uh oh",
   }
 }
