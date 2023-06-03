@@ -2,7 +2,7 @@ import { Client, Events, Colors, APIEmbed } from 'discord.js'
 import config from 'config'
 
 import { HELPERS, log } from '../../services/logger'
-import { getEmbed, tripleCheck } from '../../services/utils'
+import {getEmbed, testEndpoint} from '../../services/utils'
 
 export function ready(client: Client): void {
   client.on(Events.ClientReady, async () => {
@@ -18,10 +18,10 @@ export function ready(client: Client): void {
     )
     if (channel?.isTextBased()) {
       const initialEmbeds: APIEmbed[] = []
-      await tripleCheck(config.get('endpoint.main')).then((res) => {
+      await testEndpoint(config.get('endpoint.main')).then((res) => {
         initialEmbeds.push(getEmbed(res, 'Main'))
       })
-      await tripleCheck(config.get('endpoint.backup')).then((res) => {
+      await testEndpoint(config.get('endpoint.backup')).then((res) => {
         initialEmbeds.push(getEmbed(res, 'Backup'))
       })
       let failed = initialEmbeds.some((embed) => embed.color === Colors.Red)
@@ -46,10 +46,10 @@ export function ready(client: Client): void {
 
       setInterval(async () => {
         const embeds: APIEmbed[] = []
-        await tripleCheck(config.get('endpoint.main')).then((res) => {
+        await testEndpoint(config.get('endpoint.main')).then((res) => {
           embeds.push(getEmbed(res, 'Main'))
         })
-        await tripleCheck(config.get('endpoint.backup')).then((res) => {
+        await testEndpoint(config.get('endpoint.backup')).then((res) => {
           embeds.push(getEmbed(res, 'Backup'))
         })
         const runFailed = embeds.some((embed) => embed.color === Colors.Red)
