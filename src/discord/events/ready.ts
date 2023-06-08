@@ -44,7 +44,7 @@ export function ready(client: Client): void {
               embeds: initialEmbeds,
             })
 
-      setInterval(async () => {
+      const poll = () => (async () => {
         const embeds: APIEmbed[] = []
         await testEndpoint(config.get('endpoint.main')).then((res) => {
           embeds.push(getEmbed(res, 'Main'))
@@ -75,7 +75,11 @@ export function ready(client: Client): void {
         } else {
           await message.edit(newMessage)
         }
-      }, 1000 * 60)
+      })().finally(() => {
+        const date = new Date()
+        setTimeout(poll, (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds())
+      })
+      poll()
     }
   })
 }
