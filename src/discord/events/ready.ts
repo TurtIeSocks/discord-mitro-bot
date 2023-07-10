@@ -17,31 +17,29 @@ export function ready(client: Client): void {
       config.get('discord.logChannel'),
     )
     if (channel?.isTextBased()) {
-      const initialEmbeds: APIEmbed[] = []
+      let lastEmbeds: APIEmbed[] = []
       await testEndpoint(config.get('endpoint.main')).then((res) => {
-        initialEmbeds.push(getEmbed(res, 'Main'))
+        lastEmbeds.push(getEmbed(res, 'Main'))
       })
       await testEndpoint(config.get('endpoint.backup')).then((res) => {
-        initialEmbeds.push(getEmbed(res, 'Backup'))
+        lastEmbeds.push(getEmbed(res, 'Backup'))
       })
-      let failed = initialEmbeds.some((embed) => embed.color === Colors.Red)
-      let sendNew = false
 
       await channel.messages.fetch()
       let message =
         channel.lastMessage?.author.id === client.user.id
           ? await channel.lastMessage.edit({
               content: 'Proxy Status:',
-              embeds: initialEmbeds,
+              embeds: lastEmbeds,
             })
           : channel.lastMessage
           ? await channel.lastMessage?.reply({
               content: 'Proxy Status:',
-              embeds: initialEmbeds,
+              embeds: lastEmbeds,
             })
           : await channel.send({
               content: 'Proxy Status:',
-              embeds: initialEmbeds,
+              embeds: lastEmbeds,
             })
 
       const poll = () => (async () => {
@@ -52,26 +50,20 @@ export function ready(client: Client): void {
         await testEndpoint(config.get('endpoint.backup')).then((res) => {
           embeds.push(getEmbed(res, 'Backup'))
         })
-        const runFailed = embeds.some((embed) => embed.color === Colors.Red)
-        if (runFailed) {
-          // if any of the proxies are down
-          if (!failed) {
-            // if we haven't already sent a message
-            failed = true
+        let sendNew = false
+        for (let i = 0; i < 2; ++i) {
+          if (embeds[i].title !== lastEmbeds[i].title) {
             sendNew = true
+            break
           }
-        } else if (failed) {
-          // if it previously failed and now all is good
-          failed = false
-          sendNew = true
         }
+        lastEmbeds = embeds
         const newMessage = {
           content: 'Proxy Status:',
           embeds,
         }
         if (sendNew) {
           message = await channel.send(newMessage)
-          sendNew = false
         } else {
           await message.edit(newMessage)
         }
