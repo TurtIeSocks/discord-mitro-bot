@@ -5,7 +5,14 @@ import { HELPERS, log } from '../../services/logger'
 import { getEmbed, testEndpoint } from '../../services/utils'
 import { ProxyMessage } from '../../types'
 
-async function pollMessages(channel: Channel, userId: string) {
+function waitForMinute(cb: () => void) {
+  const date = new Date()
+  return setTimeout(
+    cb,
+    (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds(),
+  )
+}
+async function updateStatus(channel: Channel, userId: string) {
   const newMessage: ProxyMessage = {
     content: 'Proxy Status:',
     embeds: [],
@@ -18,7 +25,7 @@ async function pollMessages(channel: Channel, userId: string) {
   })
 
   if (channel?.isTextBased()) {
-    if (channel.lastMessage && channel.lastMessage.author.id === userId) {
+    if (channel.lastMessage?.author.id === userId) {
       if (
         channel.lastMessage.embeds.every(
           (embed, i) => embed.color === newMessage.embeds[i].color,
@@ -28,10 +35,16 @@ async function pollMessages(channel: Channel, userId: string) {
       } else {
         await channel.lastMessage.reply(newMessage)
       }
+    } else if (channel.lastMessage) {
+      await channel.lastMessage.reply(newMessage)
     } else {
       await channel.send(newMessage)
     }
   }
+}
+
+async function poll(...args: [Channel, string]): Promise<void> {
+  return updateStatus(...args).finally(() => waitForMinute(() => poll(...args)))
 }
 
 export function ready(client: Client): void {
@@ -48,12 +61,7 @@ export function ready(client: Client): void {
     )
     if (channel?.isTextBased()) {
       await channel.messages.fetch()
-      await pollMessages(channel, client.user.id)
-      const date = new Date()
-      setTimeout(
-        () => pollMessages(channel, client.user?.id || ''),
-        (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds(),
-      )
+      await poll(channel, client.user.id)
     }
   })
 }
