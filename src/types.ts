@@ -8,6 +8,7 @@ import type {
   SlashCommandSubcommandsOnlyBuilder,
   ModalSubmitInteraction,
   Client,
+  APIEmbed,
 } from 'discord.js'
 
 export interface Command {
@@ -79,4 +80,9 @@ export type GitHubSponsorshipEvent = Cancelled | Changed | Created
 export interface ProxyStatus {
   code: number
   message: string
+}
+
+export interface ProxyMessage {
+  content: string
+  embeds: APIEmbed[]
 }
