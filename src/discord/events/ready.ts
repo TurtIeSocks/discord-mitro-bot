@@ -5,7 +5,7 @@ import { HELPERS, log } from '../../services/logger'
 import { getEmbed, testEndpoint } from '../../services/utils'
 import { ProxyMessage } from '../../types'
 
-const pollMessages = async (channel: Channel, userId: string) => {
+async function pollMessages(channel: Channel, userId: string) {
   const newMessage: ProxyMessage = {
     content: 'Proxy Status:',
     embeds: [],
