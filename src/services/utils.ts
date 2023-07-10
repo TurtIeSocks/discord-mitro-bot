@@ -73,9 +73,11 @@ export function buildProxy(
 }
 
 export function getEmbed(status: ProxyStatus, proxy: string): APIEmbed {
+  let color: number = Colors.Red
+  if (status.code === 200) color = Colors.Green; else if (status.code > 200 && status.code < 400) color = Colors.Yellow
   return {
     title: `${status.code} for ${proxy} Proxy`,
-    color: { 200: Colors.Green, 500: Colors.Red }[status.code] || Colors.Yellow,
+    color: color,
     timestamp: new Date().toISOString(),
     description: status.message,
   }
