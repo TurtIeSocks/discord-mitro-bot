@@ -1,8 +1,38 @@
-import { Client, Events, Colors, APIEmbed } from 'discord.js'
+import { Client, Events, Channel } from 'discord.js'
 import config from 'config'
 
 import { HELPERS, log } from '../../services/logger'
-import {getEmbed, testEndpoint} from '../../services/utils'
+import { getEmbed, testEndpoint } from '../../services/utils'
+import { ProxyMessage } from '../../types'
+
+const pollMessages = async (channel: Channel, userId: string) => {
+  const newMessage: ProxyMessage = {
+    content: 'Proxy Status:',
+    embeds: [],
+  }
+  await testEndpoint(config.get('endpoint.main')).then((res) => {
+    newMessage.embeds.push(getEmbed(res, 'Main'))
+  })
+  await testEndpoint(config.get('endpoint.backup')).then((res) => {
+    newMessage.embeds.push(getEmbed(res, 'Backup'))
+  })
+
+  if (channel?.isTextBased()) {
+    if (channel.lastMessage && channel.lastMessage.author.id === userId) {
+      if (
+        channel.lastMessage.embeds.every(
+          (embed, i) => embed.color === newMessage.embeds[i].color,
+        )
+      ) {
+        await channel.lastMessage.edit(newMessage)
+      } else {
+        await channel.lastMessage.reply(newMessage)
+      }
+    } else {
+      await channel.send(newMessage)
+    }
+  }
+}
 
 export function ready(client: Client): void {
   client.on(Events.ClientReady, async () => {
@@ -17,61 +47,13 @@ export function ready(client: Client): void {
       config.get('discord.logChannel'),
     )
     if (channel?.isTextBased()) {
-      let lastEmbeds: APIEmbed[] = []
-      await testEndpoint(config.get('endpoint.main')).then((res) => {
-        lastEmbeds.push(getEmbed(res, 'Main'))
-      })
-      await testEndpoint(config.get('endpoint.backup')).then((res) => {
-        lastEmbeds.push(getEmbed(res, 'Backup'))
-      })
-
       await channel.messages.fetch()
-      let message =
-        channel.lastMessage?.author.id === client.user.id
-          ? await channel.lastMessage.edit({
-              content: 'Proxy Status:',
-              embeds: lastEmbeds,
-            })
-          : channel.lastMessage
-          ? await channel.lastMessage?.reply({
-              content: 'Proxy Status:',
-              embeds: lastEmbeds,
-            })
-          : await channel.send({
-              content: 'Proxy Status:',
-              embeds: lastEmbeds,
-            })
-
-      const poll = () => (async () => {
-        const embeds: APIEmbed[] = []
-        await testEndpoint(config.get('endpoint.main')).then((res) => {
-          embeds.push(getEmbed(res, 'Main'))
-        })
-        await testEndpoint(config.get('endpoint.backup')).then((res) => {
-          embeds.push(getEmbed(res, 'Backup'))
-        })
-        let sendNew = false
-        for (let i = 0; i < 2; ++i) {
-          if (embeds[i].title !== lastEmbeds[i].title) {
-            sendNew = true
-            break
-          }
-        }
-        lastEmbeds = embeds
-        const newMessage = {
-          content: 'Proxy Status:',
-          embeds,
-        }
-        if (sendNew) {
-          message = await channel.send(newMessage)
-        } else {
-          await message.edit(newMessage)
-        }
-      })().finally(() => {
-        const date = new Date()
-        setTimeout(poll, (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds())
-      })
-      poll()
+      await pollMessages(channel, client.user.id)
+      const date = new Date()
+      setTimeout(
+        () => pollMessages(channel, client.user?.id || ''),
+        (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds(),
+      )
     }
   })
 }
