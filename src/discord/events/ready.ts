@@ -1,4 +1,4 @@
-import { Client, Events, Channel } from 'discord.js'
+import {Client, Events, Channel, Message} from 'discord.js'
 import config from 'config'
 
 import { HELPERS, log } from '../../services/logger'
@@ -12,7 +12,7 @@ function waitForMinute(cb: () => void) {
     (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds(),
   )
 }
-async function updateStatus(channel: Channel, userId: string) {
+async function updateStatus(channel: Channel, userId: string, lastMessage: Message | undefined) {
   const newMessage: ProxyMessage = {
     content: 'Proxy Status:',
     embeds: [],
@@ -25,26 +25,21 @@ async function updateStatus(channel: Channel, userId: string) {
   })
 
   if (channel?.isTextBased()) {
-    if (channel.lastMessage?.author.id === userId) {
-      if (
-        channel.lastMessage.embeds.every(
-          (embed, i) => embed.color === newMessage.embeds[i].color,
+    if (lastMessage?.author.id === userId &&
+        lastMessage.embeds.every(
+            (embed, i) => embed.title === newMessage.embeds[i].title,
         )
-      ) {
-        await channel.lastMessage.edit(newMessage)
-      } else {
-        await channel.lastMessage.reply(newMessage)
-      }
-    } else if (channel.lastMessage) {
-      await channel.lastMessage.reply(newMessage)
+    ) {
+      return await lastMessage.edit(newMessage)
     } else {
-      await channel.send(newMessage)
+      return await channel.send(newMessage)
     }
   }
 }
 
-async function poll(...args: [Channel, string]): Promise<void> {
-  return updateStatus(...args).finally(() => waitForMinute(() => poll(...args)))
+function poll(channel: Channel, userId: string, lastMessage: Message | undefined) {
+  updateStatus(channel, userId, lastMessage).then((m) => lastMessage = m)
+      .finally(() => waitForMinute(() => poll(channel, userId, lastMessage)))
 }
 
 export function ready(client: Client): void {
@@ -60,8 +55,8 @@ export function ready(client: Client): void {
       config.get('discord.logChannel'),
     )
     if (channel?.isTextBased()) {
-      await channel.messages.fetch()
-      await poll(channel, client.user.id)
+      const messages = await channel.messages.fetch()
+      poll(channel, client.user.id, messages.filter((i) => i.author.id === client.user.id).last())
     }
   })
 }
