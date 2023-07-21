@@ -56,7 +56,9 @@ export function ready(client: Client): void {
     )
     if (channel?.isTextBased()) {
       const messages = await channel.messages.fetch()
-      poll(channel, client.user.id, messages.filter((i) => i.author.id === client.user.id).last())
+      const userId = client.user.id
+      // @ts-ignore
+      poll(channel, userId, messages.filter((i: Message) => i.author.id === userId).last())
     }
   })
 }
