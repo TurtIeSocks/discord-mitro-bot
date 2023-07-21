@@ -1,4 +1,4 @@
-import {Client, Events, Channel, Message} from 'discord.js'
+import { Client, Events, Channel, Message } from 'discord.js'
 import config from 'config'
 
 import { HELPERS, log } from '../../services/logger'
@@ -12,7 +12,11 @@ function waitForMinute(cb: () => void) {
     (60 - date.getUTCSeconds()) * 1000 - date.getUTCMilliseconds(),
   )
 }
-async function updateStatus(channel: Channel, userId: string, lastMessage: Message | undefined) {
+async function updateStatus(
+  channel: Channel,
+  userId: string,
+  lastMessage: Message | undefined,
+) {
   const newMessage: ProxyMessage = {
     content: 'Proxy Status:',
     embeds: [],
@@ -25,10 +29,11 @@ async function updateStatus(channel: Channel, userId: string, lastMessage: Messa
   })
 
   if (channel?.isTextBased()) {
-    if (lastMessage?.author.id === userId &&
-        lastMessage.embeds.every(
-            (embed, i) => embed.title === newMessage.embeds[i].title,
-        )
+    if (
+      lastMessage?.author.id === userId &&
+      lastMessage.embeds.every(
+        (embed, i) => embed.title === newMessage.embeds[i].title,
+      )
     ) {
       return await lastMessage.edit(newMessage)
     } else {
@@ -37,9 +42,14 @@ async function updateStatus(channel: Channel, userId: string, lastMessage: Messa
   }
 }
 
-function poll(channel: Channel, userId: string, lastMessage: Message | undefined) {
-  updateStatus(channel, userId, lastMessage).then((m) => lastMessage = m)
-      .finally(() => waitForMinute(() => poll(channel, userId, lastMessage)))
+function poll(
+  channel: Channel,
+  userId: string,
+  lastMessage: Message | undefined,
+) {
+  updateStatus(channel, userId, lastMessage)
+    .then((m) => (lastMessage = m))
+    .finally(() => waitForMinute(() => poll(channel, userId, lastMessage)))
 }
 
 export function ready(client: Client): void {
@@ -51,14 +61,17 @@ export function ready(client: Client): void {
 
     log.info(HELPERS.discord, `${client.user.username} is online`)
 
-    const channel = await client.channels.fetch(
-      config.get('discord.logChannel'),
-    )
+    const guild = await client.guilds.fetch(config.get('discord.guildId'))
+
+    const channel = await guild.channels.fetch(config.get('discord.logChannel'))
     if (channel?.isTextBased()) {
       const messages = await channel.messages.fetch()
       const userId = client.user.id
-      // @ts-ignore
-      poll(channel, userId, messages.filter((i: Message) => i.author.id === userId).last())
+      poll(
+        channel,
+        userId,
+        messages.filter((i: Message) => i.author.id === userId).first(),
+      )
     }
   })
 }
