@@ -47,11 +47,11 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 },
                 data: {
                   amount: tier.monthly_price_in_dollars,
-                  active: true,
+                  active: !tier.is_one_time,
                 },
               })
               log.info(
-                `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
+                `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars} (one time: ${tier.is_one_time})`,
               )
             } else {
               const main = buildProxy(
@@ -72,7 +72,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 },
               })
               log.info(
-                `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
+                `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars} (one time: ${tier.is_one_time})`,
               )
             }
           }
@@ -91,11 +91,12 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 },
                 data: {
                   amount: tier.monthly_price_in_dollars,
-                  active: tier.monthly_price_in_dollars > 0,
+                  active:
+                    tier.monthly_price_in_dollars > 0 && !tier.is_one_time,
                 },
               })
               log.info(
-                `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars}`,
+                `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars} (one time: ${tier.is_one_time})`,
               )
             } else {
               await this.prisma.user.create({
@@ -106,7 +107,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 },
               })
               log.info(
-                `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars}`,
+                `Created ${sponsor.login} with tier ${tier.monthly_price_in_dollars} (one time: ${tier.is_one_time})`,
               )
             }
           }
@@ -146,6 +147,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
         jsonifyObject({
           action: req.body.action,
           user,
+          one_time: tier.is_one_time,
           hook: user ? null : req.body.sponsorship,
         }),
       )
