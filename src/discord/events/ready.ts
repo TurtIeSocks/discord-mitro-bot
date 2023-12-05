@@ -55,6 +55,7 @@ function poll(
 export function ready(client: Client): void {
   client.on(Events.ClientReady, async () => {
     if (!client.user || !client.application) {
+      log.error(HELPERS.discord, 'Client not ready', client.toJSON())
       return
     }
     client.user.setActivity(config.get('discord.activity'))
