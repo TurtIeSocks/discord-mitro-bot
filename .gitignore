@@ -3,3 +3,5 @@ dist
 .env
 config/local.json
 yarn-error.log
+src/generated/
+prisma.config.js

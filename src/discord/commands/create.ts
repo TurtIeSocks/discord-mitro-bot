@@ -8,8 +8,8 @@ import {
 } from 'discord.js'
 import config from 'config'
 
-import type { Command } from '../../types'
-import { buildProxy } from '../../services/utils'
+import type { Command } from '../../types.js'
+import { buildProxy } from '../../services/utils.js'
 
 export const create: Command = {
   data: new SlashCommandBuilder()
@@ -28,7 +28,7 @@ export const create: Command = {
 
     const main =
       interaction.fields.getTextInputValue('mainEndpoint') ||
-      buildProxy(config.get<string>('endpoint.main'), githubUsername)
+      (await buildProxy(config.get<string>('endpoint.main'), githubUsername))
 
     const newUser = await interaction.client.ctx.db.user.create({
       data: {
@@ -37,11 +37,11 @@ export const create: Command = {
         main_endpoint: main,
         backup_endpoint:
           interaction.fields.getTextInputValue('backupEndpoint') ||
-          buildProxy(
+          (await buildProxy(
             config.get<string>('endpoint.backup'),
             githubUsername,
             main.split(':')[2].split('@')[0],
-          ),
+          )),
         amount,
         active: !!amount,
       },

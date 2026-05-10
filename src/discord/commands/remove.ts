@@ -1,5 +1,5 @@
-import { HELPERS, log } from '../../services/logger'
-import type { Command } from '../../types'
+import { HELPERS, log } from '../../services/logger.js'
+import type { Command } from '../../types.js'
 
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 

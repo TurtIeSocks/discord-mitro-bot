@@ -1,11 +1,12 @@
-import type { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from './generated/prisma/client.js'
 import type {
-  CommandInteraction,
+  ChatInputCommandInteraction,
   SlashCommandBuilder,
   Collection,
   AutocompleteInteraction,
   CacheType,
   SlashCommandSubcommandsOnlyBuilder,
+  SlashCommandOptionsOnlyBuilder,
   ModalSubmitInteraction,
   Client,
   APIEmbed,
@@ -16,11 +17,12 @@ export interface Command {
     | SlashCommandBuilder
     | Omit<SlashCommandBuilder, 'addSubcommand' | 'addSubcommandGroup'>
     | SlashCommandSubcommandsOnlyBuilder
+    | SlashCommandOptionsOnlyBuilder
   autoComplete?: (
     interaction: AutocompleteInteraction<CacheType>,
   ) => Promise<void>
   modal?: (interaction: ModalSubmitInteraction) => Promise<void>
-  run: (interaction: CommandInteraction) => Promise<void>
+  run: (interaction: ChatInputCommandInteraction) => Promise<void>
 }
 
 declare module 'discord.js' {

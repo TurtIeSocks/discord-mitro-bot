@@ -1,5 +1,5 @@
-import { getEmbed, testEndpoint } from '../../services/utils'
-import type { Command } from '../../types'
+import { getEmbed, testEndpoint } from '../../services/utils.js'
+import type { Command } from '../../types.js'
 
 import { APIEmbed, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
@@ -27,14 +27,13 @@ export const status: Command = {
       await interaction.reply({
         content: 'Proxy Status:',
         embeds,
-        ephemeral: true,
-        flags: MessageFlags.SuppressEmbeds,
+        flags: MessageFlags.Ephemeral | MessageFlags.SuppressEmbeds,
       })
     } else {
       await interaction.reply({
         content:
           'You are not registered in the database or your proxy is not active',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       })
     }
   },

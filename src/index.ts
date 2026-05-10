@@ -1,6 +1,6 @@
-import { startDiscord } from './discord/client'
-import { startServer } from './services/server'
-import { startPrisma } from './services/prisma'
+import { startDiscord } from './discord/client.js'
+import { startServer } from './services/server.js'
+import { startPrisma } from './services/prisma.js'
 
 async function main() {
   const prisma = startPrisma()

@@ -1,9 +1,9 @@
 import { Client, Events, Channel, Message } from 'discord.js'
 import config from 'config'
 
-import { HELPERS, log } from '../../services/logger'
-import { getEmbed, testEndpoint } from '../../services/utils'
-import { ProxyMessage } from '../../types'
+import { HELPERS, log } from '../../services/logger.js'
+import { getEmbed, testEndpoint } from '../../services/utils.js'
+import { ProxyMessage } from '../../types.js'
 
 function waitForMinute(cb: () => void) {
   const date = new Date()
@@ -28,7 +28,7 @@ async function updateStatus(
     newMessage.embeds.push(getEmbed(res, 'Backup'))
   })
 
-  if (channel?.isTextBased()) {
+  if (channel?.isSendable()) {
     if (
       lastMessage?.author.id === userId &&
       lastMessage.embeds.every(

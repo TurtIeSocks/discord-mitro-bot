@@ -1,7 +1,7 @@
 import { REST, Routes } from 'discord.js'
 import config from 'config'
 
-import * as commands from './src/discord/commands'
+import * as commands from './src/discord/commands/index.js'
 
 const rest = new REST().setToken(config.get('discord.token'))
 

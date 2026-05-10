@@ -1,10 +1,10 @@
 import fetch, { FetchError } from 'node-fetch'
-import ProxyAgent from 'proxy-agent'
+import { ProxyAgent } from 'proxy-agent'
 import config from 'config'
-import { log } from './logger'
+import { log } from './logger.js'
 import { APIEmbed, Colors } from 'discord.js'
-import { ProxyStatus } from '../types'
-import generatePassword from "password-generator";
+import { ProxyStatus } from '../types.js'
+import { generatePassword } from 'password-generator'
 
 export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
   for (let tries = 2; tries >= 0; --tries) {
@@ -16,8 +16,7 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
 
     try {
       const res = await fetch(config.get('endpoint.test'), {
-        agent: new ProxyAgent(proxy),
-        // @ts-ignore
+        agent: new ProxyAgent({ getProxyForUrl: () => proxy }),
         signal: controller.signal,
       })
       if (res.status === 200) {
@@ -36,10 +35,10 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
         return {
           code: -1,
           message:
-              e.code ||
-              e.message
-                  .replace(`to ${config.get('endpoint.test')}`, '')
-                  .replace(proxy, ''),
+            e.code ||
+            e.message
+              .replace(`to ${config.get('endpoint.test')}`, '')
+              .replace(proxy, ''),
         }
       }
       return {
@@ -52,7 +51,7 @@ export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
   }
   return {
     code: -3,
-    message: "uh oh",
+    message: 'uh oh',
   }
 }
 
@@ -64,12 +63,13 @@ export function getPassword() {
   return generatePassword(20)
 }
 
-export function buildProxy(
+export async function buildProxy(
   proxy: string,
   username: string,
-  password = getPassword(),
+  password?: string,
 ) {
-  return `http://${username}:${password}@${proxy.split('@')[1]}`
+  const pw = password ?? (await getPassword())
+  return `http://${username}:${pw}@${proxy.split('@')[1]}`
 }
 
 export function getEmbed(status: ProxyStatus, proxy: string): APIEmbed {

@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 
-import { jsonifyObject } from '../../services/utils'
-import type { Command } from '../../types'
+import { jsonifyObject } from '../../services/utils.js'
+import type { Command } from '../../types.js'
 
 export const select: Command = {
   data: new SlashCommandBuilder()

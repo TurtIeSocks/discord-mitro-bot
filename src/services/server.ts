@@ -1,23 +1,17 @@
-import { PrismaClient } from '@prisma/client'
+import type { PrismaClient } from '../generated/prisma/client.js'
 import type { Client } from 'discord.js'
 import fastify, { RouteShorthandOptions } from 'fastify'
 import config from 'config'
-import { log, logToDiscord } from './logger'
-import { GitHubSponsorshipEvent } from '../types'
-import { buildProxy, jsonifyObject } from './utils'
+import { log, logToDiscord } from './logger.js'
+import { GitHubSponsorshipEvent } from '../types.js'
+import { buildProxy, jsonifyObject } from './utils.js'
 
 const app = fastify()
 
-const auth: RouteShorthandOptions['preHandler'] = async (
-  request,
-  reply,
-  next,
-) => {
+const auth: RouteShorthandOptions['preHandler'] = async (request, reply) => {
   if (request.headers['x-mitro-secret'] !== config.get('apiSecret')) {
-    reply.code(401).send({ error: 'Unauthorized' })
     log.warn('Unauthorized request', request.headers)
-  } else {
-    next()
+    return reply.code(401).send({ error: 'Unauthorized' })
   }
 }
 
@@ -54,7 +48,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                 `Updated ${sponsor.login} to tier ${tier.monthly_price_in_dollars} (one time: ${tier.is_one_time})`,
               )
             } else {
-              const main = buildProxy(
+              const main = await buildProxy(
                 config.get<string>('endpoint.main'),
                 username,
               )
@@ -64,7 +58,7 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
                   amount: tier.monthly_price_in_dollars,
                   active: true,
                   main_endpoint: main,
-                  backup_endpoint: buildProxy(
+                  backup_endpoint: await buildProxy(
                     config.get<string>('endpoint.backup'),
                     username,
                     main.split(':')[2].split('@')[0],

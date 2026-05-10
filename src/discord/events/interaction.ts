@@ -1,10 +1,10 @@
 import { Client, Events, Interaction } from 'discord.js'
 
-import { HELPERS, log } from '../../services/logger'
+import { HELPERS, log } from '../../services/logger.js'
 
 export function interaction(client: Client): void {
   client.on(Events.InteractionCreate, async (interaction: Interaction) => {
-    if (interaction.isCommand()) {
+    if (interaction.isChatInputCommand()) {
       const command = interaction.client.ctx.commands.get(
         interaction.commandName,
       )

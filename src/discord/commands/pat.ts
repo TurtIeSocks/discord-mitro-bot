@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js'
 
-import type { Command } from '../../types'
+import type { Command } from '../../types.js'
 
 export const pat: Command = {
   data: new SlashCommandBuilder()

@@ -1,4 +1,5 @@
 {
-  "editor.formatOnSave": true,
-  "typescript.preferences.importModuleSpecifier": "relative"
+	"editor.formatOnSave": true,
+	"typescript.preferences.importModuleSpecifier": "relative",
+	"dependi.npm.lockFileEnabled": true
 }

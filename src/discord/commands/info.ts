@@ -1,7 +1,7 @@
-import { SlashCommandBuilder } from 'discord.js'
+import { MessageFlags, SlashCommandBuilder } from 'discord.js'
 
-import type { Command } from '../../types'
-import { jsonifyObject } from '../../services/utils'
+import type { Command } from '../../types.js'
+import { jsonifyObject } from '../../services/utils.js'
 
 export const info: Command = {
   data: new SlashCommandBuilder()
@@ -16,12 +16,12 @@ export const info: Command = {
     if (user) {
       await interaction.reply({
         content: jsonifyObject(user),
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       })
     } else {
       await interaction.reply({
         content: 'No user found',
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       })
     }
   },

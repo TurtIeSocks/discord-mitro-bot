@@ -1,5 +1,6 @@
 import {
   ActionRowBuilder,
+  MessageFlags,
   ModalBuilder,
   SlashCommandBuilder,
   TextInputBuilder,
@@ -7,7 +8,7 @@ import {
 } from 'discord.js'
 import config from 'config'
 
-import type { Command } from '../../types'
+import type { Command } from '../../types.js'
 
 export const register: Command = {
   data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ export const register: Command = {
   modal: async (interaction) => {
     const initial = await interaction.reply({
       content: 'Awaiting user input',
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     })
 
     const githubUsername = interaction.fields.getTextInputValue('github')
@@ -30,7 +31,7 @@ export const register: Command = {
       const sponsorChannel = interaction.client.channels.cache.get(
         config.get('discord.sponsorChannel'),
       )
-      if (sponsorChannel?.isTextBased()) {
+      if (sponsorChannel?.isSendable()) {
         await sponsorChannel.send({
           content: `${interaction.user.id} just registered as \`${githubUsername}\``,
         })
