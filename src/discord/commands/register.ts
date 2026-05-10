@@ -1,3 +1,4 @@
+import config from 'config'
 import {
   ActionRowBuilder,
   MessageFlags,
@@ -6,7 +7,6 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js'
-import config from 'config'
 
 import type { Command } from '../../types.js'
 

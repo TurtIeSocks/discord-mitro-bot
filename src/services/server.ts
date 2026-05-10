@@ -1,9 +1,9 @@
-import type { PrismaClient } from '../generated/prisma/client.js'
-import type { Client } from 'discord.js'
-import fastify, { RouteShorthandOptions } from 'fastify'
 import config from 'config'
+import type { Client } from 'discord.js'
+import fastify, { type RouteShorthandOptions } from 'fastify'
+import type { PrismaClient } from '../generated/prisma/client.js'
+import type { GitHubSponsorshipEvent } from '../types.js'
 import { log, logToDiscord } from './logger.js'
-import { GitHubSponsorshipEvent } from '../types.js'
 import { buildProxy, jsonifyObject } from './utils.js'
 
 const app = fastify()
@@ -150,15 +150,15 @@ app.post<{ Body: GitHubSponsorshipEvent }>(
   },
 )
 
-app.get('/api/users', { preHandler: [auth] }, async function (req, res) {
+app.get('/api/users', { preHandler: [auth] }, async function (_req, res) {
   const users = await this.prisma.user.findMany().then((users) =>
     users
       .filter((user) => user.active && user.main_endpoint)
       .map((user) => {
-        const [username, password] = user
-          .main_endpoint!.split('@')[0]
+        const [username, password] = user.main_endpoint
+          ?.split('@')[0]
           .replace('http://', '')
-          .split(':')
+          .split(':') || ['', '']
         return username && password && `basic_auth ${username} ${password}`
       })
       .filter(Boolean)

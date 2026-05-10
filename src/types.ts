@@ -1,16 +1,16 @@
-import type { PrismaClient } from './generated/prisma/client.js'
 import type {
-  ChatInputCommandInteraction,
-  SlashCommandBuilder,
-  Collection,
+  APIEmbed,
   AutocompleteInteraction,
   CacheType,
-  SlashCommandSubcommandsOnlyBuilder,
-  SlashCommandOptionsOnlyBuilder,
-  ModalSubmitInteraction,
+  ChatInputCommandInteraction,
   Client,
-  APIEmbed,
+  Collection,
+  ModalSubmitInteraction,
+  SlashCommandBuilder,
+  SlashCommandOptionsOnlyBuilder,
+  SlashCommandSubcommandsOnlyBuilder,
 } from 'discord.js'
+import type { PrismaClient } from './generated/prisma/client.js'
 
 export interface Command {
   data:

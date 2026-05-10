@@ -1,9 +1,9 @@
-import { Client, Events, Channel, Message } from 'discord.js'
 import config from 'config'
+import { type Channel, type Client, Events, type Message } from 'discord.js'
 
 import { HELPERS, log } from '../../services/logger.js'
 import { getEmbed, testEndpoint } from '../../services/utils.js'
-import { ProxyMessage } from '../../types.js'
+import type { ProxyMessage } from '../../types.js'
 
 function waitForMinute(cb: () => void) {
   const date = new Date()

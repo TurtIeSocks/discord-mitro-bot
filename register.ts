@@ -1,5 +1,5 @@
-import { REST, Routes } from 'discord.js'
 import config from 'config'
+import { REST, Routes } from 'discord.js'
 
 import * as commands from './src/discord/commands/index.js'
 

@@ -1,7 +1,6 @@
+import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 import { HELPERS, log } from '../../services/logger.js'
 import type { Command } from '../../types.js'
-
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js'
 
 export const remove: Command = {
   data: new SlashCommandBuilder()

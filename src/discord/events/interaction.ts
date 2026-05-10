@@ -1,4 +1,4 @@
-import { Client, Events, Interaction } from 'discord.js'
+import { type Client, Events, type Interaction } from 'discord.js'
 
 import { HELPERS, log } from '../../services/logger.js'
 

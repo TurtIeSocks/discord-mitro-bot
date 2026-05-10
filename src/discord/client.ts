@@ -1,9 +1,8 @@
+import config from 'config'
 import { Client, Collection } from 'discord.js'
 import type { PrismaClient } from '../generated/prisma/client.js'
-import config from 'config'
-
-import * as events from './events/index.js'
 import * as commands from './commands/index.js'
+import * as events from './events/index.js'
 
 export async function startDiscord(prisma: PrismaClient) {
   const client = new Client({

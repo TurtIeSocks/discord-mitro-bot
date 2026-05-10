@@ -1,7 +1,6 @@
+import { type APIEmbed, MessageFlags, SlashCommandBuilder } from 'discord.js'
 import { getEmbed, testEndpoint } from '../../services/utils.js'
 import type { Command } from '../../types.js'
-
-import { APIEmbed, MessageFlags, SlashCommandBuilder } from 'discord.js'
 
 export const status: Command = {
   data: new SlashCommandBuilder()

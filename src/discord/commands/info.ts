@@ -1,7 +1,6 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js'
-
-import type { Command } from '../../types.js'
 import { jsonifyObject } from '../../services/utils.js'
+import type { Command } from '../../types.js'
 
 export const info: Command = {
   data: new SlashCommandBuilder()

@@ -1,3 +1,4 @@
+import config from 'config'
 import {
   ActionRowBuilder,
   ModalBuilder,
@@ -6,10 +7,8 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js'
-import config from 'config'
-
-import type { Command } from '../../types.js'
 import { buildProxy } from '../../services/utils.js'
+import type { Command } from '../../types.js'
 
 export const create: Command = {
   data: new SlashCommandBuilder()

@@ -1,2 +1,2 @@
-export * from './ready.js'
 export * from './interaction.js'
+export * from './ready.js'

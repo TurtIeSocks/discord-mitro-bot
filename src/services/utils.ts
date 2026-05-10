@@ -1,10 +1,10 @@
-import fetch, { FetchError } from 'node-fetch'
-import { ProxyAgent } from 'proxy-agent'
 import config from 'config'
-import { log } from './logger.js'
-import { APIEmbed, Colors } from 'discord.js'
-import { ProxyStatus } from '../types.js'
+import { type APIEmbed, Colors } from 'discord.js'
+import fetch, { FetchError } from 'node-fetch'
 import { generatePassword } from 'password-generator'
+import { ProxyAgent } from 'proxy-agent'
+import type { ProxyStatus } from '../types.js'
+import { log } from './logger.js'
 
 export async function testEndpoint(proxy: string): Promise<ProxyStatus> {
   for (let tries = 2; tries >= 0; --tries) {
